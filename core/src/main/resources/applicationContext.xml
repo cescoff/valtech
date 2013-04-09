@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="configuration" class="fr.untitled3.core.ConfigurationFactory">
+        <property name="configurationFile" value="file:configuration/default.xml"/>
+    </bean>
+
+    <bean id="threadPool" class="fr.untitled3.core.ThreadPoolFactory">
+        <property name="configuration" ref="configuration"/>
+    </bean>
+
+    <bean id="pathResolver" class="fr.untitled3.core.PathResolver">
+        <property name="configuration" ref="configuration"/>
+    </bean>
+
+    <bean id="server" class="fr.untitled3.core.Server">
+        <property name="configuration" ref="configuration"/>
+        <property name="threadPoolTaskExecutor" ref="threadPool"/>
+        <property name="pathResolver" ref="pathResolver"/>
+    </bean>
+
+
+
+</beans>
