@@ -103,16 +103,26 @@ public class SocketProcessor implements Runnable {
     }
 
     private void appendHttpHeaders(HttpHeader httpHeader, WebFileResponse webFileResponse) throws IOException {
+        ContentType contentType = ContentType.getContentType(webFileResponse.getFile());
+
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(new StringBuilder().append(httpHeader.getProtocol()).append(" ").append(200).append(" ").append("OK").append("\n\r").toString().getBytes());
         outputStream.write(new StringBuilder().append("Date: ").append(DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss z").print(DateTime.now())).append("\n\r").toString().getBytes());
-        outputStream.write(new StringBuilder().append("Content-Type: text/html").append("\n\r").toString().getBytes());
+        if (contentType == ContentType.html) {
+            outputStream.write(new StringBuilder().append("Content-Type: ").append(contentType.httpResponseType).append("\n\r").toString().getBytes());
+            File webFile = webFileResponse.getFile();
 
-        File webFile = webFileResponse.getFile();
-        outputStream.write(new StringBuilder().append("Content-Length: ").append(FileUtils.sizeOf(webFile)).append("\n\r\n\r").toString().getBytes());
-        FileInputStream fileInputStream = new FileInputStream(webFile);
-        outputStream.write(IOUtils.toString(fileInputStream).getBytes());
-        fileInputStream.close();
+            outputStream.write(new StringBuilder().append("Content-Length: ").append(FileUtils.sizeOf(webFile)).append("\n\r\n\r").toString().getBytes());
+            FileInputStream fileInputStream = new FileInputStream(webFile);
+            outputStream.write(IOUtils.toString(fileInputStream).getBytes());
+            fileInputStream.close();
+        } else {
+            outputStream.write(new StringBuilder().append("Content-Type: multipart/form-data; type=\"").append(contentType.httpResponseType).append("\"; boundary=\"--simple_boundary\"; start=\"<image>\"; start-info=\"").append(contentType.httpResponseType).append("\"\r\n").append("Transfer-Encoding: chunked\r\n\r\n").append(FileUtils.sizeOf(webFileResponse.getFile())).append("\r\n").toString().getBytes());
+            FileInputStream fileInputStream = new FileInputStream(webFileResponse.getFile());
+            outputStream.write(IOUtils.toByteArray(fileInputStream));
+            fileInputStream.close();
+        }
+
         outputStream.close();
     }
 
@@ -180,6 +190,33 @@ public class SocketProcessor implements Runnable {
         public String getUserAgent() {
             return userAgent;
         }
+    }
+
+    public enum ContentType {
+        html("html", "text/html"),
+        gif("gif", "image/gif"),
+        jpg("jpg", "image/jpg"),
+        jpeg("jpeg", "image/jpeg"),
+        defaultType("*", "application/octet-stream");
+
+        private String suffix;
+
+        private String httpResponseType;
+
+        private ContentType(String suffix, String httpResponseType) {
+            this.suffix = suffix;
+            this.httpResponseType = httpResponseType;
+        }
+
+        public static ContentType getContentType(File file) {
+            for (ContentType contentType : ContentType.values()) {
+                if (contentType != defaultType) {
+                    if (StringUtils.endsWith(file.getName().toLowerCase(), contentType.suffix)) return contentType;
+                }
+            }
+            return defaultType;
+        }
+
     }
 
 }

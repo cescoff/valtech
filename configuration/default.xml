@@ -2,9 +2,6 @@
     <port>8080</port>
     <threadPoolSize>25</threadPoolSize>
     <dateTimeFormat>dd/MM/yyyy HH:mm</dateTimeFormat>
-    <logLevel>INFO</logLevel>
-    <accessLogPath>logs/access.log</accessLogPath>
-    <errorLogPath>logs/error.log</errorLogPath>
     <page404HtmlPath>errors/404.html</page404HtmlPath>
     <page500HtmlPath>errors/500.html</page500HtmlPath>
     <documentRoot>www-data</documentRoot>

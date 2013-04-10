@@ -27,32 +27,27 @@ public class PathResolver {
 
     private Map<String, File> path2Files = Maps.newHashMap();
 
-    public void loadPathFromFileSystem() {
+    public void loadPathFromFileSystem(String uri) {
+        if (path2Files.containsKey(uri)) return;
         File documentRoot = new File(configuration.getDocumentRoot());
-        Collection<File> documentRootFiles = FileUtils.listFiles(documentRoot, null, true);
-        Set<String> newUriPaths = Sets.newHashSet();
-        for (File documentRootFile : documentRootFiles) {
-            String uriPath = StringUtils.substring(documentRootFile.getPath(), StringUtils.indexOf(documentRootFile.getPath(), configuration.getDocumentRoot()) + configuration.getDocumentRoot().length());
-            if (!path2Files.containsKey(uriPath)) path2Files.put(uriPath, documentRootFile);
-            newUriPaths.add(uriPath);
-        }
-        Set<String> knownUris = Sets.newHashSet(path2Files.keySet());
-        for (String uri : knownUris) {
-            if (!newUriPaths.contains(uri)) {
-                synchronized (path2Files) {
-                    path2Files.remove(uri);
-                }
-            }
-        }
+        File requestedFile = new File(documentRoot, uri);
 
+        synchronized (path2Files) {
+            if (requestedFile.exists()) path2Files.put(uri, requestedFile);
+        }
     }
 
     public WebFileResponse resolve(String uri) {
         try {
-            loadPathFromFileSystem();
+            loadPathFromFileSystem(uri);
             synchronized (path2Files) {
                 if (path2Files.containsKey(uri)) {
-                    return new WebFileResponse(uri, path2Files.get(uri));
+                    File resultFile = path2Files.get(uri);
+                    if (!resultFile.exists()) {
+                        path2Files.remove(uri);
+                        return new WebFileResponse(uri, 404);
+                    } else return new WebFileResponse(uri, resultFile);
+
                 } else {
                     StringBuilder uriWithWelcomeFile = new StringBuilder(uri);
                     if (StringUtils.endsWith(uri, "/")) {

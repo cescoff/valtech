@@ -17,7 +17,9 @@ public class ConfigurationFactory implements FactoryBean<Configuration> {
 
     @Override
     public Configuration getObject() throws Exception {
-        return JAXBUtils.unmarshal(Configuration.class, configurationFile.getInputStream());
+        Configuration configuration = JAXBUtils.unmarshal(Configuration.class, configurationFile.getInputStream());
+        configuration.validate();
+        return configuration;
     }
 
     @Override

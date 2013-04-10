@@ -27,6 +27,13 @@ public class Main {
         } catch (IOException e) {
             logger.error("A fatal error has occured while starting server", e);
         }
+        // Used to prevent maven plugin to stop
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+        }
     }
 
 }
