@@ -31,15 +31,6 @@ public class Configuration {
     private String dateTimeFormat = "dd/MM/yyyy HH:mm";
 
     @XmlElement
-    private String logLevel = "INFO";
-
-    @XmlElement
-    private String accessLogPath = "logs/access.log";
-
-    @XmlElement
-    private String errorLogPath = "logs/error.log";
-
-    @XmlElement
     private String page404HtmlPath = "errors/404.html";
 
     @XmlElement
@@ -73,30 +64,6 @@ public class Configuration {
 
     public void setDateTimeFormat(String dateTimeFormat) {
         this.dateTimeFormat = dateTimeFormat;
-    }
-
-    public String getLogLevel() {
-        return logLevel;
-    }
-
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
-    }
-
-    public String getAccessLogPath() {
-        return accessLogPath;
-    }
-
-    public void setAccessLogPath(String accessLogPath) {
-        this.accessLogPath = accessLogPath;
-    }
-
-    public String getErrorLogPath() {
-        return errorLogPath;
-    }
-
-    public void setErrorLogPath(String errorLogPath) {
-        this.errorLogPath = errorLogPath;
     }
 
     public String getPage404HtmlPath() {
@@ -138,12 +105,6 @@ public class Configuration {
         } catch (Throwable t) {
             throw new IllegalStateException("Invalid value for 'dateTimeFormat'", t);
         }
-
-        File accessLogDir = new File(accessLogPath);
-        if (!accessLogDir.exists()) accessLogDir.mkdirs();
-
-        File errorLogDir = new File(errorLogPath);
-        if (!errorLogDir.exists()) errorLogDir.mkdirs();
 
         File page404File = new File(page404HtmlPath);
         if (!page404File.exists()) throw new IllegalStateException("'page404HtmlPath' does not exist");
